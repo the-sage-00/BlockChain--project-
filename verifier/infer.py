@@ -30,7 +30,7 @@ rankedInv_dir = '../all_results/sampled_results/rankedInv'
 vul_dir = '../all_results/sampled_results/vul'
 large_exp_results_dir = "./large_exp_results"
 refined_exp_results = "./refined_exp_results"
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "EMPTY"))
 
 def load_trained_llama(model_name):
 	global model

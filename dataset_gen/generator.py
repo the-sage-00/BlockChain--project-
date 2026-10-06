@@ -18,7 +18,15 @@ import pandas as pd
 import simplejson as json
 from collections import OrderedDict
 from numpy import random
-from numpy import random
+import builtins
+
+builtins_open = builtins.open
+def utf8_open(*args, **kwargs):
+    mode = args[1] if len(args) > 1 else kwargs.get('mode', 'r')
+    if 'b' not in mode:
+        kwargs.setdefault('encoding', 'utf-8')
+    return builtins_open(*args, **kwargs)
+open = utf8_open
 
 
 def _make_w_io_base(f, mode: str):

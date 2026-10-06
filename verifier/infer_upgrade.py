@@ -12,16 +12,29 @@ import numpy as np
 import pandas as pd
 import openai
 from openai import OpenAI
-from prompts.bug_search import search
-#uncomment and use the following line instead when calling from smartinv.py
-#from .prompts.GPTScan.query_template import prompt_single_yes_no_question, prompt_multiple_choice_scenarios 
-from prompts.GPTScan.query_template import prompt_single_yes_no_question, prompt_multiple_choice_scenarios 
+try:
+	from prompts.bug_search import search
+except ImportError:
+	try:
+		from verifier.prompts.bug_search import search
+	except ImportError:
+		def search(prompt): return prompt
+
+try:
+	from prompts.GPTScan.query_template import prompt_single_yes_no_question, prompt_multiple_choice_scenarios 
+except ImportError:
+	try:
+		from verifier.prompts.GPTScan.query_template import prompt_single_yes_no_question, prompt_multiple_choice_scenarios
+	except ImportError:
+		def prompt_single_yes_no_question(*args, **kwargs): return ""
+		def prompt_multiple_choice_scenarios(*args, **kwargs): return ""
 
 
 refined_exp_results = "./refined_exp_results"
 large_exp_results_dir = "./large_exp_results"
-prompt_exp_results = '/home/sallyjunsongwang/SmartInv/all_results/prompting_results'
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+prompt_exp_results = './all_results/prompting_results'
+light_results = "./all_results/light_results"
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "EMPTY"))
 vul_list = ["price manipulation", "privilege escalation", "business logic flaw", "inconsistent state update", "atomicity violation", "cross bridge inconsistency", "ID uniqueness violation"]
 
 scenarios = ["add or check approval via require/if statements before the token transfer",
@@ -49,7 +62,7 @@ def gpt_infer(prompt):
 	return chat_completion.choices[0].message.content
 
 def find_program_points(folder, file_results_dir, limit):
-	path =f"/home/sallyjunsongwang/SmartInv/verifier/prompts/program_point.txt"
+	path = os.path.join(os.path.dirname(__file__), "prompts", "program_point.txt")
 	preparation_1 = open(path, "r")
 	if (os.path.isdir(file_results_dir)) is False:
 		os.mkdir(file_results_dir)
@@ -77,7 +90,7 @@ def find_program_points(folder, file_results_dir, limit):
 
 
 def find_invariants(folder, file_results_dir, limit):
-	path =f"/home/sallyjunsongwang/SmartInv/verifier/prompts/invariant.txt"
+	path = os.path.join(os.path.dirname(__file__), "prompts", "invariant.txt")
 	preparation_1 = open(path, "r")
 	if (os.path.isdir(file_results_dir)) is False:
 		os.mkdir(file_results_dir)
@@ -208,7 +221,7 @@ def find_bugs_light_mode(folder, file_results_dir, limit):
   
 def infer_bugs(folder, file_results_dir, exp_name, prompt, limit):
 	list = []
-	path =f"/home/sallyjunsongwang/SmartInv/verifier/prompts/{prompt}"
+	path = os.path.join(os.path.dirname(__file__), "prompts", prompt)
 	print(path)
 	if exp_name == "gptscan":
 		preparation_1 = f"You are a smart contract auditor. You will be asked \

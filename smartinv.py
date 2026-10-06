@@ -58,8 +58,8 @@ updated_tot_param = 'sallywww/tot_llama_update'
 verified_dir = "./verified_results"
 large_exp_results_dir = "./large_exp_results"
 refined_exp_results = "./refined_exp_results"
-light_sampled_results = "/home/sallyjunsongwang/SmartInv/all_results/sampled_results"
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+light_sampled_results = "./all_results/sampled_results"
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "EMPTY"))
 manual_time_budget = 150
 
 
@@ -265,7 +265,7 @@ def run_manticore(large_exp_results_dir, contract_file, filename):
 	result_file.close()
 		
 def run_large_scale_exp():
-	test_dir = "/home/sallyjunsongwang/SmartInv/tests/contracts"
+	test_dir = "./tests/contracts"
 	for filename in os.listdir(test_dir):
 		contract_file = os.path.join(test_dir, filename)
 		run_verisol(large_exp_results_dir, contract_file, filename)
@@ -283,7 +283,7 @@ def run_refined_exp():
 	smartinv_prompt = "smartinv_functionalbug.txt"
 	line_limit = 300
 	file_results_dir = refined_exp_results
-	audited_bug_folder_path = f"/home/sallyjunsongwang/SmartInv/tests/refined_analysis/additional_audited_bugs"
+	audited_bug_folder_path = "./tests/refined_analysis/additional_audited_bugs"
 	if (os.path.isdir(file_results_dir)) is False:
 		os.mkdir(file_results_dir)
 	for root, dirs, files in os.walk(audited_bug_folder_path):
@@ -303,7 +303,7 @@ def run_refined_exp():
 			#run_manticore(file_results_dir, contract_file, filename)			
 	sets = ["set1", "set2", "set3"]
 	for i in sets:
-		test_folder_path = f"/home/sallyjunsongwang/SmartInv/tests/refined_analysis/natural_bugs/{i}"
+		test_folder_path = f"./tests/refined_analysis/natural_bugs/{i}"
 		for root, dirs, files in os.walk(audited_bug_folder_path):
 			for filename in files:
 				if ".sol" not in filename:
@@ -426,9 +426,13 @@ def main():
 	if args.runtime_exp == True:
 		run_runtime_exp()
 	if args.heavy == True:
-		run_heavy_SmartInv(args.file, args.contract, args.verify)
-	if args.light == True:
-		run_light_SmartInv(contract_file, filename, args.verify)
+		if args.file and args.contract:
+			run_heavy_SmartInv(args.file, args.contract, args.verify)
+		else:
+			print("Please provide --file and --contract arguments for heavy mode.")
+	elif args.light == True:
+		if args.file and args.contract:
+			run_light_SmartInv(args.file, args.contract, args.verify)
 
 	
 if __name__ == "__main__":
